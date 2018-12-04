@@ -4,19 +4,43 @@ let pointCount;
 let points=[];
 let padding;
 let tolerance;
+let differ;
+let redraw;
 
 function setup() {
     createCanvas(800, 600);
-    background(51);
     padding = 20;
-    pointCount = 5;
-    tolerance = 0.5;
+    pointCount = createSlider(1,20,3,1);
+    tolerance = createSlider(0.1, 0.9, 0.5, 0.1);
+    redraw = createButton("Redraw!");
+    redraw.mousePressed(init);
+    differ = createCheckbox("Differ algorithm");
+    differ.changed(init);
+    init();
+}
+
+function draw() {
+    let prevSelected = random(points);
+    for (let i = 0; i < 100; i++) {
+        let randomSelected = random(points);
+        if(randomSelected != prevSelected || differ.checked()){
+            currentPos.x= lerp(previousPos.x, randomSelected.x,tolerance.value());
+            currentPos.y= lerp(previousPos.y, randomSelected.y,tolerance.value());
+            point(currentPos.x, currentPos.y);
+            previousPos=currentPos;
+            prevSelected = randomSelected;
+        }
+    }
+}
+
+function init(){
+    background(51);
+    points = [];
     let r;
     if(height<width) r = (height-2*padding)/2;
     else r = (width-2*padding)/2;
-    for(let i = 0;i<pointCount;i++){
-        let angle = i*TWO_PI/pointCount;
-        console.log(angle);
+    for(let i = 0;i<pointCount.value();i++){
+        let angle = i*TWO_PI/pointCount.value();
         points.push(new p5.Vector(
             r*Math.cos(angle)+width/2,
             r*Math.sin(angle)+height/2
@@ -34,18 +58,4 @@ function setup() {
 
     stroke(255);
     strokeWeight(1);
-}
-
-function draw() {
-    let prevSelected = random(points);
-    for (let i = 0; i < 100; i++) {
-        let randomSelected = random(points);
-        if(randomSelected != prevSelected){
-            currentPos.x= lerp(previousPos.x, randomSelected.x,tolerance);
-            currentPos.y= lerp(previousPos.y, randomSelected.y,tolerance);
-            point(currentPos.x, currentPos.y);
-            previousPos=currentPos;
-            prevSelected = randomSelected;
-        }
-    }
 }
